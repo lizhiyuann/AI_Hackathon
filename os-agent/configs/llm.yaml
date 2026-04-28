@@ -1,0 +1,69 @@
+# 大模型配置 - 支持多厂商切换
+# 当前使用的LLM提供商
+active_provider: "tongyi"
+
+# 多厂商配置
+providers:
+  # 深度求索 - OpenAI兼容格式
+  deepseek:
+    api_key: "${DEEPSEEK_API_KEY}"
+    base_url: "https://api.deepseek.com/v1"
+    model: "deepseek-chat"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # 通义千问（阿里云百炼） - OpenAI兼容格式
+  tongyi:
+    api_key: "sk-6a4ebaf508d5430ebd0b8003446ff13b"
+    base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    model: "qwen3-max"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # 文心一言
+  wenxin:
+    api_key: "${WENXIN_API_KEY}"
+    secret_key: "${WENXIN_SECRET_KEY}"
+    base_url: "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop"
+    model: "ernie-bot"
+    temperature: 0.7
+
+  # 智谱 - OpenAI兼容格式
+  zhipu:
+    api_key: "${ZHIPU_API_KEY}"
+    base_url: "https://open.bigmodel.cn/api/paas/v4"
+    model: "glm-4"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # 月之暗面 - OpenAI兼容格式
+  moonshot:
+    api_key: "${MOONSHOT_API_KEY}"
+    base_url: "https://api.moonshot.cn/v1"
+    model: "moonshot-v1-8k"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # 百川 - OpenAI兼容格式
+  baichuan:
+    api_key: "${BAICHUAN_API_KEY}"
+    base_url: "https://api.baichuan-ai.com/v1"
+    model: "Baichuan4"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # 零一万物 - OpenAI兼容格式
+  yi:
+    api_key: "${YI_API_KEY}"
+    base_url: "https://api.lingyiwanwu.com/v1"
+    model: "yi-large"
+    temperature: 0.7
+    max_tokens: 4096
+
+  # OpenAI（备选）
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "https://api.openai.com/v1"
+    model: "gpt-4o-mini"
+    temperature: 0.7
+    max_tokens: 4096

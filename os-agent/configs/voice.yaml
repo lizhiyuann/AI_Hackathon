@@ -1,0 +1,75 @@
+# 语音配置
+
+# 语音识别配置 (STT - Speech To Text)
+stt:
+  engine: "vosk"
+
+  # vosk引擎配置（离线语音识别，轻量级）
+  vosk:
+    model_path: "models/vosk-model-small-cn-0.22"
+    sample_rate: 16000
+    language: "zh"
+
+  # faster-whisper引擎配置（更强但更重）
+  local:
+    model_size: "base"
+    device: "cpu"
+    language: "zh"
+    compute_type: "int8"
+
+  # API引擎配置（支持多厂商云端服务）
+  api:
+    provider: "aliyun"
+
+    # 阿里云语音识别
+    aliyun:
+      app_key: "${ALIYUN_ASR_APP_KEY}"
+      access_key_id: "${ALIYUN_ACCESS_KEY_ID}"
+      access_key_secret: "${ALIYUN_ACCESS_KEY_SECRET}"
+      endpoint: "nls-meta.cn-shanghai.aliyuncs.com"
+
+    # 百度语音识别
+    baidu:
+      app_id: "${BAIDU_ASR_APP_ID}"
+      api_key: "${BAIDU_ASR_API_KEY}"
+      secret_key: "${BAIDU_ASR_SECRET_KEY}"
+
+    # 讯飞语音识别
+    xunfei:
+      app_id: "${XUNFEI_APP_ID}"
+      api_key: "${XUNFEI_API_KEY}"
+      api_secret: "${XUNFEI_API_SECRET}"
+      api_url: "wss://iat-api.xfyun.cn/v2/iat"
+
+# 语音合成配置 (TTS - Text To Speech)
+tts:
+  engine: "local"
+
+  # 本地引擎配置（edge-tts - 微软免费TTS）
+  local:
+    voice: "zh-CN-XiaoxiaoNeural"
+    rate: "+0%"
+    volume: "+0%"
+    pitch: "+0Hz"
+
+  # API引擎配置
+  api:
+    provider: "aliyun"
+
+    # 阿里云语音合成
+    aliyun:
+      app_key: "${ALIYUN_TTS_APP_KEY}"
+      access_key_id: "${ALIYUN_ACCESS_KEY_ID}"
+      access_key_secret: "${ALIYUN_ACCESS_KEY_SECRET}"
+      voice: "xiaoyun"
+      endpoint: "nls-gateway-cn-shanghai.aliyuncs.com"
+
+    # 百度语音合成
+    baidu:
+      app_id: "${BAIDU_TTS_APP_ID}"
+      api_key: "${BAIDU_TTS_API_KEY}"
+      secret_key: "${BAIDU_TTS_SECRET_KEY}"
+      per: 0
+      spd: 5
+      pit: 5
+      vol: 5

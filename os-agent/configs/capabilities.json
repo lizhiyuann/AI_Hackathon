@@ -1,0 +1,283 @@
+{
+  "capabilities": {
+    "disk": {
+      "enabled": true,
+      "name": "磁盘管理",
+      "description": "磁盘使用情况监测与分析",
+      "supported_actions": ["check_usage", "check_inode", "check_io", "check_mount"],
+      "risk_level": "low",
+      "commands": {
+        "check_usage": {
+          "cmd": {
+            "windows": "wmic logicaldisk get caption,size,freespace /format:csv 2>nul",
+            "linux": "df -h",
+            "linux_variants": {
+              "CentOS": "df -h --output=source,size,used,avail,pcent,target",
+              "RHEL": "df -h --output=source,size,used,avail,pcent,target",
+              "Fedora": "df -h --output=source,size,used,avail,pcent,target",
+              "openEuler": "df -hT",
+              "Ubuntu": "df -h",
+              "Debian": "df -h",
+              "Alibaba Cloud Linux": "df -h --output=source,size,used,avail,pcent,target"
+            }
+          },
+          "description": "查看磁盘使用率"
+        },
+        "check_inode": {
+          "cmd": {
+            "windows": "echo inode查询仅在Linux系统上支持",
+            "linux": "df -i"
+          },
+          "description": "查看inode使用情况"
+        },
+        "check_io": {
+          "cmd": {
+            "windows": "typeperf \"\\PhysicalDisk(*)\\Disk Bytes/sec\" -sc 1 2>nul",
+            "linux": "iostat -x 1 1 2>/dev/null || cat /proc/diskstats | head -20",
+            "linux_variants": {
+              "CentOS": "iostat -x 1 1",
+              "RHEL": "iostat -x 1 1",
+              "Fedora": "iostat -x 1 1",
+              "Ubuntu": "iostat -x 1 1 2>/dev/null || echo '需要安装sysstat: apt install sysstat'",
+              "Debian": "iostat -x 1 1 2>/dev/null || echo '需要安装sysstat: apt install sysstat'",
+              "openEuler": "iostat -x 1 1"
+            }
+          },
+          "description": "查看磁盘IO状态"
+        },
+        "check_mount": {
+          "cmd": {
+            "windows": "wmic logicaldisk get caption,description,providername /format:csv 2>nul",
+            "linux": "mount | grep '^/dev/' | column -t 2>/dev/null || mount | grep '^/dev/'"
+          },
+          "description": "查看挂载点"
+        }
+      }
+    },
+    "file": {
+      "enabled": true,
+      "name": "文件操作",
+      "description": "文件与目录检索操作",
+      "supported_actions": ["search", "list", "view", "copy", "move", "delete", "create_dir", "create_file"],
+      "risk_level": "low",
+      "commands": {
+        "list": {
+          "cmd": {
+            "windows": "dir {path} 2>nul",
+            "linux": "ls -la {path} 2>&1"
+          },
+          "description": "列出目录内容",
+          "risk": "low"
+        },
+        "search": {
+          "cmd": {
+            "windows": "dir /s /b {path}\\*{pattern}* 2>nul",
+            "linux": "find {path} -name '*{pattern}*' -type f 2>/dev/null | head -50"
+          },
+          "description": "搜索文件",
+          "risk": "low"
+        },
+        "view": {
+          "cmd": {
+            "windows": "type {path} 2>nul",
+            "linux": "cat {path} 2>&1"
+          },
+          "description": "查看文件内容",
+          "risk": "low"
+        },
+        "copy": {
+          "cmd": {
+            "windows": "copy {source} {dest} 2>&1",
+            "linux": "cp -r {source} {dest} 2>&1"
+          },
+          "description": "复制文件",
+          "risk": "medium"
+        },
+        "move": {
+          "cmd": {
+            "windows": "move {source} {dest} 2>&1",
+            "linux": "mv {source} {dest} 2>&1"
+          },
+          "description": "移动文件",
+          "risk": "medium"
+        },
+        "delete": {
+          "cmd": {
+            "windows": "rmdir /s /q {path} 2>&1 || del /q {path} 2>&1",
+            "linux": "rm -rf {path} 2>&1"
+          },
+          "description": "删除文件",
+          "risk": "high",
+          "confirm": true
+        },
+        "create_dir": {
+          "cmd": {
+            "windows": "mkdir {path} 2>&1",
+            "linux": "mkdir -p {path} 2>&1"
+          },
+          "description": "创建目录",
+          "risk": "low"
+        },
+        "create_file": {
+          "cmd": {
+            "windows": "echo {content} > {path} 2>&1",
+            "linux": "touch {path} 2>&1"
+          },
+          "description": "创建文件",
+          "risk": "low"
+        }
+      }
+    },
+    "process": {
+      "enabled": true,
+      "name": "进程管理",
+      "description": "进程及端口状态查询",
+      "supported_actions": ["list", "search", "kill", "check_port", "check_service"],
+      "risk_level": "low",
+      "commands": {
+        "list": {
+          "cmd": {
+            "windows": "tasklist /FO CSV /NH 2>nul",
+            "linux": "ps aux --sort=-%mem | head -30"
+          },
+          "description": "查看进程列表",
+          "risk": "low"
+        },
+        "search": {
+          "cmd": {
+            "windows": "tasklist /FI \"IMAGENAME eq *{keyword}*\" /FO CSV /NH 2>nul",
+            "linux": "ps aux | grep '{keyword}' | grep -v grep"
+          },
+          "description": "搜索进程",
+          "risk": "low"
+        },
+        "kill": {
+          "cmd": {
+            "windows": "taskkill /PID {pid} /F 2>&1",
+            "linux": "kill {pid} 2>&1"
+          },
+          "description": "终止进程",
+          "risk": "high",
+          "confirm": true
+        },
+        "check_port": {
+          "cmd": {
+            "windows": "netstat -ano | findstr \":{port} \" 2>nul",
+            "linux": "ss -tlnp 2>/dev/null | grep ':{port} ' || netstat -tlnp 2>/dev/null | grep ':{port} ' || echo '端口 {port} 未占用'"
+          },
+          "description": "检查端口占用",
+          "risk": "low"
+        },
+        "check_service": {
+          "cmd": {
+            "windows": "sc query \"{service}\" 2>nul",
+            "linux": "systemctl status {service} 2>&1 | head -20"
+          },
+          "description": "检查服务状态",
+          "risk": "low"
+        }
+      }
+    },
+    "user": {
+      "enabled": true,
+      "name": "用户管理",
+      "description": "用户账号管理",
+      "supported_actions": ["list", "info", "create", "delete", "modify"],
+      "risk_level": "medium",
+      "commands": {
+        "list": {
+          "cmd": {
+            "windows": "net user 2>nul",
+            "linux": "cat /etc/passwd | grep -v nologin | grep -v false | head -30"
+          },
+          "description": "查看用户列表",
+          "risk": "low"
+        },
+        "info": {
+          "cmd": {
+            "windows": "net user {username} 2>nul",
+            "linux": "id {username} 2>&1"
+          },
+          "description": "查看用户信息",
+          "risk": "low"
+        },
+        "create": {
+          "cmd": {
+            "windows": "net user {username} /add 2>&1",
+            "linux": "useradd -m {username} 2>&1"
+          },
+          "description": "创建用户",
+          "risk": "high",
+          "confirm": true
+        },
+        "delete": {
+          "cmd": {
+            "windows": "net user {username} /delete 2>&1",
+            "linux": "userdel {username} 2>&1"
+          },
+          "description": "删除用户",
+          "risk": "critical",
+          "confirm": true
+        },
+        "modify": {
+          "cmd": {
+            "windows": "net user {username} {options} 2>&1",
+            "linux": "usermod {options} {username} 2>&1"
+          },
+          "description": "修改用户",
+          "risk": "high",
+          "confirm": true
+        }
+      }
+    },
+    "system": {
+      "enabled": true,
+      "name": "系统信息",
+      "description": "系统基本信息查询",
+      "supported_actions": ["info", "uptime", "memory", "cpu", "network"],
+      "risk_level": "low",
+      "commands": {
+        "info": {
+          "cmd": {
+            "windows": "systeminfo 2>nul | findstr /B /C:\"OS\" /C:\"System\"",
+            "linux": "uname -a && cat /etc/os-release 2>/dev/null | grep -E 'NAME|VERSION'"
+          },
+          "description": "查看系统信息",
+          "risk": "low"
+        },
+        "uptime": {
+          "cmd": {
+            "windows": "net statistics workstation | findstr \"Statistics since\"",
+            "linux": "uptime"
+          },
+          "description": "查看运行时间",
+          "risk": "low"
+        },
+        "memory": {
+          "cmd": {
+            "windows": "wmic OS get FreePhysicalMemory,TotalVisibleMemorySize /format:csv 2>nul",
+            "linux": "free -h"
+          },
+          "description": "查看内存使用",
+          "risk": "low"
+        },
+        "cpu": {
+          "cmd": {
+            "windows": "wmic cpu get name,numberofcores,numberoflogicalprocessors /format:csv 2>nul",
+            "linux": "top -bn1 | head -20"
+          },
+          "description": "查看CPU状态",
+          "risk": "low"
+        },
+        "network": {
+          "cmd": {
+            "windows": "ipconfig 2>nul",
+            "linux": "ip addr show 2>/dev/null || ifconfig"
+          },
+          "description": "查看网络配置",
+          "risk": "low"
+        }
+      }
+    }
+  }
+}
